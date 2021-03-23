@@ -5,8 +5,9 @@
  */
 package analisis_imagenes;
 
-import imagenes.ManipulacionImagen;
+import java.awt.Dimension;
 import java.io.IOException;
+import componentes.JFrameModificarImagenes;
 
 /**
  *
@@ -20,10 +21,7 @@ public class Analisis_Imagenes {
      * @throws java.lang.InterruptedException
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        // TODO code application logic here
-        ManipulacionImagen aux = new ManipulacionImagen();
-        aux.obtenerImagen();
-        aux.cambiarPixeles();
+        JFrameModificarImagenes aux = new JFrameModificarImagenes(new Dimension(500, 400));
     }
     
 }
