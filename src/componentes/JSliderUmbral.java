@@ -23,7 +23,7 @@ public class JSliderUmbral extends JSlider{
     
     private final ManipulacionImagen manipulador;
     
-    public JSliderUmbral(ManipulacionImagen manipulador,int min, int max, int espacio) throws IOException {
+    public JSliderUmbral(ManipulacionImagen manipulador,int min, int max, int espacio,String change) throws IOException {
         this.manipulador = manipulador;
         this.setPaintTicks(true);
         this.setPaintLabels(true);
@@ -32,7 +32,7 @@ public class JSliderUmbral extends JSlider{
         this.setMaximum(max);
         this.setMinimum(min);
         this.setFont(new Font(Font.SANS_SERIF, 1, 16));
-        this.addChangeListener(new ListenerSlider(this.manipulador));
+        this.addChangeListener(new ListenerSlider(this.manipulador,change));
     }
     
     

@@ -8,6 +8,7 @@ package listener;
 import componentes.JFrameModificarImagenes;
 import imagenes.ManipulacionImagen;
 import java.io.IOException;
+import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -19,9 +20,11 @@ import javax.swing.event.ChangeListener;
 public class ListenerSlider implements ChangeListener{
     
     private final ManipulacionImagen manipulador;
+    private String cambio_imagen;
 
-    public ListenerSlider(ManipulacionImagen manipulador) throws IOException {
+    public ListenerSlider(ManipulacionImagen manipulador, String change) throws IOException {
         this.manipulador = manipulador;
+        this.cambio_imagen = change;
     }
     
     
@@ -30,17 +33,21 @@ public class ListenerSlider implements ChangeListener{
         
        JSlider slider = (JSlider) e.getSource();
        if(!slider.getValueIsAdjusting()){
+           
            JFrameModificarImagenes frame = this.manipulador.getFrame();
            frame.getContentPane().removeAll();
            frame.repaint();
            
-           try {
-               frame.add(this.manipulador.obtenerImagen());
-           } catch (IOException ex) {
-           }
+           if(this.cambio_imagen.equals("Binarizar")){
+                frame.add(this.manipulador.getImage());
            
-           this.manipulador.setEscalaGrisesImagen();
-           this.manipulador.setBinarizacionImagen(slider.getValue());
+                this.manipulador.setEscalaGrisesImagen();
+                this.manipulador.setBinarizacionImagen(slider.getValue());
+           }else if(this.cambio_imagen.equals("Iluminar")){
+                frame.add(this.manipulador.getImage());
+           
+                this.manipulador.modificarIluminacion(slider.getValue());
+           }  
            
            frame.revalidate();
            frame.repaint();

@@ -45,7 +45,7 @@ public class ManipulacionImagen {
     public JLabel obtenerImagen() throws IOException{
         JFileChooser chooser = new JFileChooser();
         chooser.showOpenDialog(null);
-        
+
         this.buffer_original = ImageIO.read(chooser.getSelectedFile());//Obtenemos la imagen en un buffer
         this.buffer_cambiada = cloneBuffer(this.buffer_original);
         
@@ -54,7 +54,11 @@ public class ManipulacionImagen {
         
         //Creamos un label con la imagen
         this.imagen = new JLabel(new ImageIcon(this.buffer_cambiada));
-        
+
+        return this.imagen;
+    }
+    
+    public JLabel getImage(){
         return this.imagen;
     }
     
@@ -97,6 +101,19 @@ public class ManipulacionImagen {
         }
     }
     
+    public void modificarIluminacion(int valor){
+        Color color;
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height;h++){
+                color = new Color(this.buffer_original.getRGB(w,h));
+                int r = checarColor(color.getRed() + valor);
+                int g = checarColor(color.getGreen() + valor);
+                int b = checarColor(color.getBlue() + valor);
+                color = new Color(r,g,b);
+                this.buffer_cambiada.setRGB(w,h, color.getRGB());
+            }
+        }
+    }
     public void obtenerHistograma(){
         Color color;
         this.red = new int[256];
@@ -121,6 +138,14 @@ public class ManipulacionImagen {
         return newBuffer;
     }
     
+    private int checarColor(int valorColor){
+        if(valorColor > 255){
+            return 255;
+        }else if(valorColor < 0){
+            return 0;
+        }
+        return valorColor;
+    }
     public BufferedImage getBuffer() {
         return buffer_cambiada;
     }
@@ -160,9 +185,5 @@ public class ManipulacionImagen {
     public void setBlue(int[] blue) {
         this.blue = blue;
     }
-    
-    
-
-    
     
 }

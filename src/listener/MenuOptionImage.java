@@ -128,7 +128,7 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
                     //Y lo agregamos a un nuevo JFrame
                     JSliderUmbral slider = null;
                     try {
-                        slider = new JSliderUmbral(this.manipulador,0, 255, 15);
+                        slider = new JSliderUmbral(this.manipulador,0, 255, 15,"Binarizar");
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
@@ -138,9 +138,28 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
                         frame_nuevo.setSize(400, 120);
                         frame_nuevo.setLocationRelativeTo(null);
                         frame_nuevo.add(slider);
-                    } 
+                }
+                break;  
+            }
+            case "Iluminacion":{
+                 if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                 JSliderUmbral slider = null;
+                    try {
+                        slider = new JSliderUmbral(this.manipulador,0, 255, 15,"Iluminar");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                        JFrame frame_nuevo = new JFrame();
+                        frame_nuevo.setVisible(true);
+                        frame_nuevo.setTitle("Umbral para la binarización");
+                        frame_nuevo.setSize(400, 120);
+                        frame_nuevo.setLocationRelativeTo(null);
+                        frame_nuevo.add(slider);
                 }
                 break;
+            }
             default:{
                 this.manipulador.obtenerHistograma();
                 Graficador grafica = new Graficador(this.manipulador.getRed(), 
@@ -149,7 +168,7 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
                 JFrame frameNuevo = new JFrame("Histograma");
                 frameNuevo.setVisible(true);
                 frameNuevo.setLocationRelativeTo(null);
-                frameNuevo.setSize(400, 900);
+                frameNuevo.setSize(900, 400);
                 ChartPanel panel = grafica.getChartPanel();
                 frameNuevo.add(panel);
                 break;
