@@ -37,7 +37,6 @@ public class ListenerSlider implements ChangeListener{
            JFrameModificarImagenes frame = this.manipulador.getFrame();
            frame.getContentPane().removeAll();
            frame.repaint();
-           
            if(this.cambio_imagen.equals("Binarizar")){
                 frame.add(this.manipulador.getImage());
            
@@ -47,6 +46,22 @@ public class ListenerSlider implements ChangeListener{
                 frame.add(this.manipulador.getImage());
            
                 this.manipulador.modificarIluminacion(slider.getValue());
+           }else if(this.cambio_imagen.equals("ExpansionLinealR1")){
+                frame.add(this.manipulador.getImage());
+                this.manipulador.setR1(slider.getValue());
+                this.manipulador.setExpansionLineal();
+           }else if(this.cambio_imagen.equals("ExpansionLinealR2")){
+                frame.add(this.manipulador.getImage());
+                this.manipulador.setR2(slider.getValue());
+                this.manipulador.setExpansionLineal();
+           }else if(this.cambio_imagen.equals("ExpansionLog")){
+               frame.add(this.manipulador.getImage());
+               this.manipulador.setValorExpansiones(slider.getValue());
+               this.manipulador.setExpansionLogaritmica();
+           }else if(this.cambio_imagen.equals("ExpansionExp")){
+               frame.add(this.manipulador.getImage());
+               this.manipulador.setValorExpansiones(slider.getValue());
+               this.manipulador.setExpansionExponencial();
            }  
            
            frame.revalidate();

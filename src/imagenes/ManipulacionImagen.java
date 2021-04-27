@@ -9,7 +9,6 @@ import componentes.JFrameModificarImagenes;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -29,6 +28,8 @@ public class ManipulacionImagen {
     private int[] red;
     private int[] green;
     private int[] blue;
+    private int valorMinimoR1, valorMaximoR2;
+    private int valorExpansiones;
 
     public ManipulacionImagen(JFrameModificarImagenes frame) throws IOException {
         this.frame = frame;
@@ -37,9 +38,12 @@ public class ManipulacionImagen {
         this.imagen = null;
         this.width = 0;
         this.height = 0;
-        this.red = new int[255];
-        this.green = new int[255];
-        this.blue = new int[255];
+        this.red = new int[256];
+        this.green = new int[256];
+        this.blue = new int[256];
+        this.valorMinimoR1 = 0;
+        this.valorMaximoR2 = 0;
+        this.valorExpansiones = 0;
     }
     
     public JLabel obtenerImagen() throws IOException{
@@ -114,6 +118,7 @@ public class ManipulacionImagen {
             }
         }
     }
+    
     public void obtenerHistograma(){
         Color color;
         this.red = new int[256];
@@ -128,6 +133,201 @@ public class ManipulacionImagen {
                 this.blue[color.getBlue()]++;
             }
         } 
+    }
+    
+    public void setBinarizacionAutomatica(){
+        //Primero obtenemos un promedio usando el histograma
+        int umbral_actual = obtenerHistogramaPromedio(), umbral_anterior = 0;
+        
+        do{
+            umbral_anterior = umbral_actual;
+            umbral_actual = obtenerNuevoUmbral(umbral_actual);
+        }while(umbral_actual != umbral_anterior);
+        
+        //Obtenemos la binarizacion
+        setEscalaGrisesImagen();
+        setBinarizacionImagen(umbral_actual);
+    }
+    
+    private int obtenerHistogramaPromedio(){
+        //Obtenemos el hisotgrama actual
+        obtenerHistograma();
+        
+        int resultado = obtenerPromedioHistograma(0, 255);
+        
+        return resultado;
+    }
+    
+    public void setExpansionLineal(){
+        Color color;
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h< this.height;h++){
+                color = new Color(this.buffer_original.getRGB(w,h));
+                int valorRed = checarColor((color.getRed() - this.valorMinimoR1) * ((int)((double)255 / (double)this.valorMaximoR2 - this.valorMinimoR1)));
+                int valorGreen = checarColor((color.getGreen() - this.valorMinimoR1) * ((int)((double)255 / (double)this.valorMaximoR2 - this.valorMinimoR1)));
+                int valorBlue = checarColor((color.getBlue() - this.valorMinimoR1) * ((int)((double)255 / (double)this.valorMaximoR2 - this.valorMinimoR1)));
+                
+                Color colorNuevo = new Color(valorRed, valorGreen, valorBlue);
+                this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());
+            }
+        } 
+        
+    }
+    
+    public void setR1(int valor){
+        this.valorMinimoR1 = valor;
+    }
+    
+    public void setR2(int valor){
+        this.valorMaximoR2 = valor;
+    }
+    
+    public void setValorExpansiones(int valor){
+        this.valorExpansiones = valor;
+    }
+    
+    public void setExpansionLogaritmica(){
+        Color color;
+        
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h< this.height;h++){
+                color = new Color(this.buffer_original.getRGB(w,h));
+                int valorRed = checarColor((int)((double)(255*Math.log(1+color.getRed()))/(double)(Math.log(1+this.valorExpansiones))));
+                int valorGreen = checarColor((int)((double)(255*Math.log(1+color.getGreen()))/(double)(Math.log(1+this.valorExpansiones))));
+                int valorBlue = checarColor((int)((double)(255*Math.log(1+color.getBlue()))/(double)(Math.log(1+this.valorExpansiones))));
+                
+                Color colorNuevo = new Color(valorRed, valorGreen, valorBlue);
+                this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());
+            }
+        } 
+    }
+    
+    public void setExpansionExponencial(){
+        Color color;
+        
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h< this.height;h++){
+                color = new Color(this.buffer_original.getRGB(w,h));
+                int valorRed = checarColor((int) Math.pow(1+this.valorExpansiones, color.getRed() / this.valorExpansiones));
+                int valorGreen = checarColor((int) Math.pow(1+this.valorExpansiones, color.getGreen() / this.valorExpansiones));
+                int valorBlue = checarColor((int) Math.pow(1+this.valorExpansiones, color.getBlue() / this.valorExpansiones));
+                
+                Color colorNuevo = new Color(valorRed, valorGreen, valorBlue);
+                this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());
+            }
+        } 
+    }
+    
+    public void setEcualizacion(){
+        double acumulado[] = new double[256];
+        int suma = 0;
+        Color color;
+        
+        setEscalaGrisesImagen();
+        obtenerHistograma();
+        
+        //Primero hacemos la suma acumulativa de el histograma
+        for(int posicionHistograma = 0; posicionHistograma < 255 ; posicionHistograma++){
+            suma += (this.red[posicionHistograma] + this.green[posicionHistograma] + this.blue[posicionHistograma]);
+            acumulado[posicionHistograma] = suma;
+        }
+        
+        double constante = ( (double) 255 / (double) (this.width * this.height) );
+        
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h< this.height;h++){
+                color = new Color(this.buffer_original.getRGB(w,h));
+                int posicionArreglo = color.getRed();
+                
+                //El nuevo color será el valor que de de multiplicar la constante por el valor de el acumulado del
+                //histograma en la posicion que de del promecio de los 3 colores del pixel
+                int nuevoColor = checarColor((int)Math.round((acumulado[posicionArreglo] * constante)));
+                Color nuevoColorPixel = new Color(nuevoColor,nuevoColor,nuevoColor);
+                
+                this.buffer_cambiada.setRGB(w, h, nuevoColorPixel.getRGB());
+                
+            }
+        }
+    }
+    
+    public void setConvolucion(int valores[][]){
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height; h++){
+                //Creamos una variable para guardar la sumatoria
+                int sumatoriaOperacionRed = 0, sumatoriaOperacionGreen = 0, sumatoriaOperacionBlue = 0;
+                
+                //Obtenemos la posicion inicial de la matriz en la imagen para poder hacer
+                //las operaciones
+                int posInicialWMatriz = w - 2;
+                int posInicialHMatriz = h - 2;
+                //Hacemos la operacion de la matriz
+                for(int posicionWidth = w - 2; posicionWidth < (w-2) + 5;  posicionWidth++){
+                    for(int posicionHeight = h - 2; posicionHeight < (h-2) + 5; posicionHeight++){
+                        //Evaluamos si la posicion es valida dentro de la imagen
+                        if(isValidValue(posicionWidth, posicionHeight)){
+                            //Obtenemos el valor de el pixel
+                            Color pixelActual = new Color(this.buffer_original.getRGB(posicionWidth,posicionHeight));
+                            int red = pixelActual.getRed();
+                            int green = pixelActual.getGreen();
+                            int blue = pixelActual.getBlue();
+                            
+                            //Hacemos la multiplicacion del tono con el valor del kernel
+                            int multiplicacionRed = (red * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                            int multiplicaionGreen = (green * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                            int multiplicaionBlue = (blue * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                            
+                            //Sumamos el resultado de la multiplicacion
+                            sumatoriaOperacionRed += multiplicacionRed;
+                            sumatoriaOperacionGreen += multiplicaionGreen;
+                            sumatoriaOperacionBlue += multiplicaionBlue;
+                        }
+                    }    
+                }
+                
+                //Verificamos que las sumatorias entren en un rango de 0 a 255
+                sumatoriaOperacionRed = checarValorColor(sumatoriaOperacionRed);
+                sumatoriaOperacionGreen = checarValorColor(sumatoriaOperacionGreen);
+                sumatoriaOperacionBlue = checarValorColor(sumatoriaOperacionBlue);
+                
+                //Seteamos el nuevo color
+                Color colorNuevo = new Color(sumatoriaOperacionRed, sumatoriaOperacionGreen, sumatoriaOperacionBlue);
+                this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());
+            }
+        }
+    }
+    
+    private int obtenerNuevoUmbral(int umbral_actual){
+        /*Ahora comparamos ambos espectros del umbral actual
+         Obtenemos el resultado de el promedio de cada uno de los espectros, y retornamos el promedio 
+         de los 2 promedios
+        */
+        int resultado_espectro_izquierdo = 0, resultado_espectro_derecho = 0;
+        
+        try {
+            resultado_espectro_izquierdo = obtenerPromedioHistograma(0, umbral_actual);
+            resultado_espectro_derecho = 0;
+            if(umbral_actual < 253){
+                resultado_espectro_derecho = obtenerPromedioHistograma(umbral_actual + 1, 255);
+            }
+        } catch (ArithmeticException e) {
+            //Si se da una excepcion, la cantidad de pixeles del lado derecho o izquierdo
+            //es 0
+            return 0;
+        }
+        
+        return (int)((resultado_espectro_izquierdo + resultado_espectro_derecho) / 2 );
+    }
+    
+    private int obtenerPromedioHistograma(int inicio, int fin){
+        int acumulado = 0, cantidad_pixeles = 0, cantidad_rgb = 0;
+        //Recorremos el histograma
+        
+        for(int posicionHistograma = inicio; posicionHistograma <= fin; posicionHistograma++){
+            cantidad_rgb = this.red[posicionHistograma] + this.green[posicionHistograma] + this.red[posicionHistograma];
+            cantidad_pixeles += cantidad_rgb;
+            acumulado += cantidad_rgb * posicionHistograma;
+        }
+        return (int)(acumulado / cantidad_pixeles);
     }
     
     private BufferedImage cloneBuffer(BufferedImage source){
@@ -184,6 +384,20 @@ public class ManipulacionImagen {
 
     public void setBlue(int[] blue) {
         this.blue = blue;
+    }
+    
+    private boolean isValidValue(int valorWidth, int valorHeight){
+        return (valorWidth >= 0 && valorWidth < this.width) && (valorHeight >= 0 && valorHeight < this.height);
+    }
+    
+    private int checarValorColor(int valor){
+        if(valor < 0){
+            return 0;
+        }else if(valor > 255){
+            return 255;
+        }
+        
+        return valor;
     }
     
 }

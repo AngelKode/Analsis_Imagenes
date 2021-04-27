@@ -24,18 +24,33 @@ public class JFrameModificarImagenes extends JFrame{
         super.setVisible(true);
         initComponents(d);
         
+        //Menus principales
         ArrayList<String> menus = new ArrayList<>();
         menus.add("Archivo");
         menus.add("Editar Imagen");
+        
+        //SubMenus con sus respectivos listeners
         ArrayList<String[]> items = new ArrayList<>();
         ArrayList<String[]> actionCommandsItems = new ArrayList<>();
-        items.add(new String[]{"Abrir imagen"});
-        actionCommandsItems.add(new String[]{"AbrirImagen"});//Accion que detectará el item listener
-        items.add(new String[]{"Escala de Grises", "Negativo","Binarizar","Modificar Iluminación","Histograma de la imagen"});
-        actionCommandsItems.add(new String[]{"EscalaGrises","Negativo","Binarizar","Iluminacion","Histograma"});//Accion que detectará el item listener
         
+        //Creamos los items del primer menu
+        items.add(new String[]{"Abrir imagen"});
+        //Accion que detectará el item listener
+        actionCommandsItems.add(new String[]{"AbrirImagen"});
+        
+        //Creamos los items del segundo menu
+        items.add(new String[]{"Escala de Grises", "Negativo","Binarizar","Binarizacion Automática","Modificar Iluminación",
+                               "Histograma de la imagen","Expansion Lineal","Expansion Logarítmica","Expansion Exponencial","Ecualizacion",
+                               "Matriz de Convolución"});
+        //Accion que detectará el item listener del segundo menú
+        actionCommandsItems.add(new String[]{"EscalaGrises","Negativo","Binarizar","AutoBinarizar","Iluminacion",
+                                "Histograma","ExLineal","ExLog","ExExponencial","Ecualizar","MatrizConv"});
+        
+        //Creamos un objeto con los menus y submenus anteriores
         MenuOptionImage menu_object = new MenuOptionImage(menus, items,actionCommandsItems,this);
+        //Seteamos el JMenuBar
         this.setJMenuBar(menu_object);
+        
         //Validamos lo que se agregó y refrescamos el jframe
         this.validate();
         this.repaint();

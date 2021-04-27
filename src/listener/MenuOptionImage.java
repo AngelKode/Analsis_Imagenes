@@ -5,6 +5,7 @@
  */
 package listener;
 
+import componentes.JFrameMatriz;
 import imagenes.ManipulacionImagen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +21,7 @@ import javax.swing.JMenuItem;
 import componentes.JFrameModificarImagenes;
 import componentes.JSliderUmbral;
 import graficas.Graficador;
+import java.awt.GridLayout;
 import javax.swing.JOptionPane;
 import org.jfree.chart.ChartPanel;
 
@@ -36,7 +38,8 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
     private final ManipulacionImagen manipulador;
     
     
-    public MenuOptionImage(ArrayList<String> menuPrincipalNombres, ArrayList<String[]> itemsNombres,ArrayList<String[]> actionCommands,JFrameModificarImagenes frame) throws IOException {
+    public MenuOptionImage(ArrayList<String> menuPrincipalNombres, ArrayList<String[]> itemsNombres,
+                           ArrayList<String[]> actionCommands,JFrameModificarImagenes frame) throws IOException {
         //Inicializamos los componentes
         this.frame = frame;
         this.label = null;
@@ -153,24 +156,126 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
                     }
                         JFrame frame_nuevo = new JFrame();
                         frame_nuevo.setVisible(true);
-                        frame_nuevo.setTitle("Umbral para la binarización");
+                        frame_nuevo.setTitle("Umbral para la iluminación");
                         frame_nuevo.setSize(400, 120);
                         frame_nuevo.setLocationRelativeTo(null);
                         frame_nuevo.add(slider);
                 }
                 break;
             }
+            case "AutoBinarizar":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    this.manipulador.setBinarizacionAutomatica();
+                    this.frame.revalidate();//Revalidamos
+                    this.frame.repaint();//Actualizamos
+                }
+                break;  
+            }
+            
+            case "ExLineal":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    JSliderUmbral slider = null;
+                    JSliderUmbral slider2 = null;
+                    try {
+                        slider = new JSliderUmbral(this.manipulador,0, 255, 15,"ExpansionLinealR1");
+                        slider2 = new JSliderUmbral(this.manipulador,0,255,15,"ExpansionLinealR2");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                        JFrame frame_nuevo = new JFrame();
+                        frame_nuevo.setLayout(new GridLayout(4, 1));
+                        frame_nuevo.setVisible(true);
+                        frame_nuevo.setTitle("Umbral para expansion lineal");
+                        frame_nuevo.setSize(400, 120);
+                        frame_nuevo.setLocationRelativeTo(null);
+                        frame_nuevo.add(new JLabel("Valor R1"));
+                        frame_nuevo.add(slider);
+                        frame_nuevo.add(new JLabel("Valor R2"));
+                        frame_nuevo.add(slider2);
+                }
+                break;
+            }
+            
+            case "ExLog":{
+                 if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    JSliderUmbral slider = null;
+                    try {
+                        slider = new JSliderUmbral(this.manipulador,0, 255, 15,"ExpansionLog");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                        JFrame frame_nuevo = new JFrame();
+                        frame_nuevo.setVisible(true);
+                        frame_nuevo.setTitle("Umbral para la expansion logarítmica");
+                        frame_nuevo.setSize(400, 120);
+                        frame_nuevo.setLocationRelativeTo(null);
+                        frame_nuevo.add(slider);
+                }
+                break;
+            }
+            
+            case "ExExponencial":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    JSliderUmbral slider = null;
+                    try {
+                        slider = new JSliderUmbral(this.manipulador,0, 255, 15,"ExpansionExp");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                        JFrame frame_nuevo = new JFrame();
+                        frame_nuevo.setVisible(true);
+                        frame_nuevo.setTitle("Umbral para la expansion exponencial");
+                        frame_nuevo.setSize(400, 120);
+                        frame_nuevo.setLocationRelativeTo(null);
+                        frame_nuevo.add(slider);
+                }
+                break;
+            }
+            
+            case "Ecualizar":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    this.manipulador.setEcualizacion();
+                    this.frame.revalidate();//Revalidamos
+                    this.frame.repaint();//Actualizamos
+                }
+                break;
+            }
+            
+            case "MatrizConv":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    //Abrimos una nueva ventana para manipular la matriz
+                    JFrameMatriz matrizConvolucion = new JFrameMatriz(this.manipulador);
+                }
+                break;
+            }
             default:{
-                this.manipulador.obtenerHistograma();
-                Graficador grafica = new Graficador(this.manipulador.getRed(), 
-                                                    this.manipulador.getGreen(), 
-                                                    this.manipulador.getBlue());
-                JFrame frameNuevo = new JFrame("Histograma");
-                frameNuevo.setVisible(true);
-                frameNuevo.setLocationRelativeTo(null);
-                frameNuevo.setSize(900, 400);
-                ChartPanel panel = grafica.getChartPanel();
-                frameNuevo.add(panel);
+                if(!isLabelNull()){
+                    this.manipulador.obtenerHistograma();
+                    Graficador grafica = new Graficador(this.manipulador.getRed(), 
+                                                        this.manipulador.getGreen(), 
+                                                        this.manipulador.getBlue());
+                    JFrame frameNuevo = new JFrame("Histograma");
+                    frameNuevo.setVisible(true);
+                    frameNuevo.setLocationRelativeTo(null);
+                    frameNuevo.setSize(900, 400);
+                    ChartPanel panel = grafica.getChartPanel();
+                    frameNuevo.add(panel);
+                }else{
+                   JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE); 
+                }
+                
                 break;
             }
         }
