@@ -51,9 +51,9 @@ public final class JFrameMatriz extends JFrame{
         
         for(int fila = 0; fila < tamanioMatriz; fila++){
             for(int columna = 0; columna < tamanioMatriz; columna++){
-                JTextField botonAux = new JTextField("0");
-                this.matriz[fila][columna] = botonAux;//Lo agregamos a la matriz
-                this.panelMatriz.add(botonAux);//Agregamos al panel
+                JTextField txtAux = new JTextField("0");
+                this.matriz[fila][columna] = txtAux;//Lo agregamos a la matriz
+                this.panelMatriz.add(txtAux);//Agregamos al panel
             }
         }
         
