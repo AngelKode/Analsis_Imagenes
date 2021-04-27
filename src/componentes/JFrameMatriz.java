@@ -52,7 +52,6 @@ public final class JFrameMatriz extends JFrame{
         for(int fila = 0; fila < tamanioMatriz; fila++){
             for(int columna = 0; columna < tamanioMatriz; columna++){
                 JTextField botonAux = new JTextField("0");
-                botonAux.setActionCommand("txtValorMatriz" + fila+1 + "x" + columna+1);
                 this.matriz[fila][columna] = botonAux;//Lo agregamos a la matriz
                 this.panelMatriz.add(botonAux);//Agregamos al panel
             }
