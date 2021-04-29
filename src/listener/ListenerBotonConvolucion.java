@@ -35,7 +35,9 @@ public class ListenerBotonConvolucion implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("btnOK")){
+            
             int valoresMatriz[][] = new int[5][5];
+            //Obtenemos los valores de la matriz que ingresó el usuario
             for(int renglon = 0; renglon < 5; renglon++){
                 for(int columna = 0; columna < 5; columna++){
                     valoresMatriz[renglon][columna] = this.valores[renglon][columna].getValue();
@@ -46,7 +48,9 @@ public class ListenerBotonConvolucion implements ActionListener{
             boolean green = this.canales[1].isSelected();
             boolean blue = this.canales[2].isSelected();
             
+            //Hacemos la convolucion de la imagen
             this.manipulador.setConvolucion(valoresMatriz,this.divisor.getValue(),this.offset.getValue(), red, green, blue);
+            //Actualizamos la imagen
             this.manipulador.getFrame().revalidate();
             this.manipulador.getFrame().repaint();
         }
