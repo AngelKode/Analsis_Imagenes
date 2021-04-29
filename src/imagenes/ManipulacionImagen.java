@@ -250,11 +250,18 @@ public class ManipulacionImagen {
         }
     }
     
-    public void setConvolucion(int valores[][]){
+    public void setConvolucion(int valores[][], int divisor, int offset, boolean red, boolean green, boolean blue){
         for(int w = 0; w < this.width; w++){
             for(int h = 0; h < this.height; h++){
-                //Creamos una variable para guardar la sumatoria
-                int sumatoriaOperacionRed = 0, sumatoriaOperacionGreen = 0, sumatoriaOperacionBlue = 0;
+                
+                //Obtenemos el pixel actual
+                Color colorActual = new Color(this.buffer_original.getRGB(w, h));
+                
+                //Creamos una variable para guardar la sumatorias de cada canal, pero si no esta habilitado
+                //algun canal, su valor será el valor del pixel actual
+                int sumatoriaOperacionRed = (red) ? 0 : colorActual.getRed();
+                int sumatoriaOperacionGreen =  (green) ? 0 : colorActual.getGreen();
+                int sumatoriaOperacionBlue =  (blue) ? 0 : colorActual.getBlue();
                 
                 //Obtenemos la posicion inicial de la matriz en la imagen para poder hacer
                 //las operaciones
@@ -267,28 +274,59 @@ public class ManipulacionImagen {
                         if(isValidValue(posicionWidth, posicionHeight)){
                             //Obtenemos el valor de el pixel
                             Color pixelActual = new Color(this.buffer_original.getRGB(posicionWidth,posicionHeight));
-                            int red = pixelActual.getRed();
-                            int green = pixelActual.getGreen();
-                            int blue = pixelActual.getBlue();
+                            int _red = pixelActual.getRed();
+                            int _green = pixelActual.getGreen();
+                            int _blue = pixelActual.getBlue();
                             
-                            //Hacemos la multiplicacion del tono con el valor del kernel
-                            int multiplicacionRed = (red * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
-                            int multiplicaionGreen = (green * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
-                            int multiplicaionBlue = (blue * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                            //Hacemos la multiplicacion del tono con el valor del kernel dependiendo de los canales seleccionados
+                            int multiplicacionRed = 0, multiplicacionGreen = 0, multiplicacionBlue = 0;
+
+                            if(red){
+                                multiplicacionRed = (_red * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                                sumatoriaOperacionRed += multiplicacionRed;//Sumamos el resultado
+                            }
+                            if(green){
+                                multiplicacionGreen = (_green * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                                sumatoriaOperacionGreen += multiplicacionGreen;//Sumamos el resultado
+                            }
+                            if(blue){
+                                multiplicacionBlue = (_blue * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                                sumatoriaOperacionBlue += multiplicacionBlue;//Sumamos el resultado
+                            }
                             
-                            //Sumamos el resultado de la multiplicacion
-                            sumatoriaOperacionRed += multiplicacionRed;
-                            sumatoriaOperacionGreen += multiplicaionGreen;
-                            sumatoriaOperacionBlue += multiplicaionBlue;
                         }
                     }    
                 }
                 
-                //Verificamos que las sumatorias entren en un rango de 0 a 255
-                sumatoriaOperacionRed = checarValorColor(sumatoriaOperacionRed);
-                sumatoriaOperacionGreen = checarValorColor(sumatoriaOperacionGreen);
-                sumatoriaOperacionBlue = checarValorColor(sumatoriaOperacionBlue);
+                //Checamos si hay valores en divisor diferentes de 0
+                divisor = (divisor != 0) ? divisor : 1;
                 
+                //Hacemos la division y el offset, dependiendo las selecciones de canales
+                if(red){
+                    sumatoriaOperacionRed /= divisor;
+                    //Agregamos el offset
+                    sumatoriaOperacionRed += offset;
+                    
+                    //Verificamos que las sumatorias entren en un rango de 0 a 255
+                    sumatoriaOperacionRed = checarValorColor(sumatoriaOperacionRed);
+                }
+                if(green){
+                    sumatoriaOperacionGreen /= divisor;
+                    //Agregamos el offset
+                    sumatoriaOperacionGreen += offset;
+                    
+                    //Verificamos que las sumatorias entren en un rango de 0 a 255
+                    sumatoriaOperacionGreen = checarValorColor(sumatoriaOperacionGreen);
+                }
+                if(blue){
+                    sumatoriaOperacionBlue /= divisor;
+                    //Agregamos el offset
+                    sumatoriaOperacionBlue += offset;
+                    
+                    //Verificamos que las sumatorias entren en un rango de 0 a 255
+                    sumatoriaOperacionBlue = checarValorColor(sumatoriaOperacionBlue);
+                }
+
                 //Seteamos el nuevo color
                 Color colorNuevo = new Color(sumatoriaOperacionRed, sumatoriaOperacionGreen, sumatoriaOperacionBlue);
                 this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());

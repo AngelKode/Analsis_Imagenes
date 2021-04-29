@@ -8,7 +8,9 @@ package listener;
 import imagenes.ManipulacionImagen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import org.jfree.ui.Spinner;
 
 /**
  *
@@ -17,11 +19,16 @@ import javax.swing.JTextField;
 public class ListenerBotonConvolucion implements ActionListener{
     
     ManipulacionImagen manipulador;
-    JTextField[][] valores;
+    Spinner[][] valores;
+    Spinner divisor, offset;
+    JRadioButton canales[];
 
-    public ListenerBotonConvolucion(ManipulacionImagen manipulador, JTextField[][] valores) {
+    public ListenerBotonConvolucion(ManipulacionImagen manipulador, Spinner[][] valores, Spinner divisor, Spinner offset, JRadioButton canales[]) {
         this.manipulador = manipulador;
         this.valores = valores;
+        this.divisor = divisor;
+        this.offset = offset;
+        this.canales = canales;
     }
     
     
@@ -31,10 +38,15 @@ public class ListenerBotonConvolucion implements ActionListener{
             int valoresMatriz[][] = new int[5][5];
             for(int renglon = 0; renglon < 5; renglon++){
                 for(int columna = 0; columna < 5; columna++){
-                    valoresMatriz[renglon][columna] = Integer.parseInt(this.valores[renglon][columna].getText());
+                    valoresMatriz[renglon][columna] = this.valores[renglon][columna].getValue();
                 }
             }
-            this.manipulador.setConvolucion(valoresMatriz);
+            //JRadioButton de los canales
+            boolean red = this.canales[0].isSelected();
+            boolean green = this.canales[1].isSelected();
+            boolean blue = this.canales[2].isSelected();
+            
+            this.manipulador.setConvolucion(valoresMatriz,this.divisor.getValue(),this.offset.getValue(), red, green, blue);
             this.manipulador.getFrame().revalidate();
             this.manipulador.getFrame().repaint();
         }

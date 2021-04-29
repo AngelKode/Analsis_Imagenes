@@ -7,13 +7,25 @@ package componentes;
 
 import imagenes.ManipulacionImagen;
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import javafx.scene.layout.Border;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import listener.ListenerBotonConvolucion;
+import org.jfree.ui.Spinner;
 
 /**
  *
@@ -22,57 +34,137 @@ import listener.ListenerBotonConvolucion;
 public final class JFrameMatriz extends JFrame{
     
     private static final int tamanioMatriz = 5;
-    private final JTextField[][] matriz;
+    private final Spinner[][] matriz;
+    private final Spinner divisor, offset;
     private final JButton btnOK;
-    private final JPanel panelMatriz, panelBotones, panelTextoMatriz;
+    private final JRadioButton rgb[];
+    private final JPanel panelPrincipal,panelMatrizPrincipal, panelMatriz ,panelBotones, panelConfiguraciones, panelCanales, panelOpcionesCanales;
     private final ManipulacionImagen manipulador;
     
     public JFrameMatriz(ManipulacionImagen manipulador){
-        this.matriz = new JTextField[tamanioMatriz][tamanioMatriz];
+        this.matriz = new Spinner[tamanioMatriz][tamanioMatriz];
         this.btnOK = new JButton("Aceptar");
-        this.panelMatriz = new JPanel(new GridLayout(tamanioMatriz, tamanioMatriz));
-        this.panelBotones = new JPanel(new GridLayout(1, 1));
-        this.panelTextoMatriz = new JPanel(new GridLayout(1, 1));
+        
+        this.rgb = new JRadioButton[3];
+        this.rgb[0] = new JRadioButton("Red");
+            this.rgb[0].setSelected(true);
+        this.rgb[1] = new JRadioButton("Green");
+            this.rgb[1].setSelected(true);
+        this.rgb[2] = new JRadioButton("Blue");
+            this.rgb[2].setSelected(true);
+        
+        this.panelPrincipal = new JPanel();
+        this.panelPrincipal.setLayout(new BoxLayout(this.panelPrincipal, BoxLayout.Y_AXIS));
+        this.panelMatrizPrincipal = new JPanel();
+        
+        this.panelMatriz = new JPanel(new GridLayout(tamanioMatriz, tamanioMatriz,15,15));
+        this.panelMatriz.setBorder(BorderFactory.createEmptyBorder(15,15,0,15));
+        
+        this.panelBotones = new JPanel();
+        this.panelBotones.setLayout(new BoxLayout(this.panelBotones, BoxLayout.X_AXIS));
+        
+        this.panelConfiguraciones = new JPanel();
+        
+        this.panelCanales = new JPanel(new GridLayout(2, 1));
+        this.panelOpcionesCanales = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        
         this.manipulador = manipulador;
+        this.divisor = new Spinner(0);
+        this.offset = new Spinner(0);
+
         initListeners();
         initComponents();
     }
     
     public void initListeners(){
-        ListenerBotonConvolucion listener = new ListenerBotonConvolucion(this.manipulador, this.matriz);
+        ListenerBotonConvolucion listener = new ListenerBotonConvolucion(this.manipulador, this.matriz, this.divisor,this.offset, this.rgb);
         this.btnOK.addActionListener(listener);
         this.btnOK.setActionCommand("btnOK");
     }
     public void initComponents(){
-        //Seteamos un layout de tipo grid para el panel de la matriz y de los botones
-        this.setLayout(new BorderLayout(0, 10));
         
-        //Creamos los JTextField para ingresar los valores de la matriz
-        
+        //Creamos los Spinner para ingresar los valores de la matriz
         for(int fila = 0; fila < tamanioMatriz; fila++){
             for(int columna = 0; columna < tamanioMatriz; columna++){
-                JTextField txtAux = new JTextField("0");
-                this.matriz[fila][columna] = txtAux;//Lo agregamos a la matriz
-                this.panelMatriz.add(txtAux);//Agregamos al panel
+                Spinner spinnerAux = new Spinner(0);
+                this.matriz[fila][columna] = spinnerAux;//Lo agregamos a la matriz
+                this.panelMatriz.add(spinnerAux);//Agregamos al panel
             }
         }
         
-        //Agregamos los botones
-        this.btnOK.setSize(this.getWidth(), 40);
-        this.panelBotones.setSize(this.getWidth(), 40);
+        //Lo agregamos al principal
+        JLabel tituloMatriz = new JLabel("Matriz");
+            tituloMatriz.setFont(new Font("Arial", Font.BOLD, 16));
+            tituloMatriz.setHorizontalAlignment(JLabel.CENTER);
+            tituloMatriz.setVerticalAlignment(JLabel.CENTER);
+        JPanel panelTexto = new JPanel();
+        panelTexto.setLayout(new BoxLayout(panelTexto, BoxLayout.X_AXIS));
+        panelTexto.add(tituloMatriz);
+        this.panelMatrizPrincipal.setLayout(new BoxLayout(this.panelMatrizPrincipal, BoxLayout.Y_AXIS));
+        this.panelMatrizPrincipal.add(panelTexto);
+        this.panelMatrizPrincipal.add(this.panelMatriz);
+        
+        //Agregamos las configuraciones del divisor y el offset
+        //Primero agregamos los jlabels
+        this.panelConfiguraciones.setLayout(new BoxLayout(this.panelConfiguraciones, BoxLayout.X_AXIS));
+        
+        JPanel panelTituloConfiguraciones = new JPanel();
+        panelTituloConfiguraciones.setLayout(new GridLayout(1, 2));
+        
+        //Paneles que contendrán el JLabel y el Spinner del divisor y el offset
+        JPanel panelDivisor = new JPanel();
+            panelDivisor.setLayout(new BoxLayout(panelDivisor, BoxLayout.Y_AXIS));
+        JPanel panelLabelDivisor = new JPanel();
+        JLabel labelDivisor = new JLabel("Divisor");
+            labelDivisor.setHorizontalAlignment(JLabel.CENTER);
+            panelLabelDivisor.add(labelDivisor);
+            
+            panelDivisor.add(panelLabelDivisor);
+            panelDivisor.add(this.divisor);
+            panelDivisor.setBorder(BorderFactory.createEmptyBorder(15, 15,15,15));
+        JPanel panelOffset = new JPanel();
+            panelOffset.setLayout(new BoxLayout(panelOffset, BoxLayout.Y_AXIS));
+        JPanel panelLabelOffset = new JPanel();
+        JLabel labelOffset = new JLabel("Offset");
+            labelOffset.setHorizontalAlignment(JLabel.CENTER);
+            panelLabelOffset.add(labelOffset);
+            
+            panelOffset.add(panelLabelOffset);
+            panelOffset.add(this.offset);
+            panelOffset.setBorder(BorderFactory.createEmptyBorder(15, 15,15,15));
+            
+        this.panelConfiguraciones.add(panelDivisor);
+        this.panelConfiguraciones.add(panelOffset);
+        
+        //Agregamos la configuracion de los canales
+        //Configuramos el panel de los canales
+        JLabel tituloCanales = new JLabel("Canales");
+            tituloCanales.setHorizontalAlignment(JLabel.CENTER);
+            tituloCanales.setFont(new Font("Arial", Font.BOLD, 16));
+        this.panelCanales.add(new JPanel().add(tituloCanales));
+            this.panelOpcionesCanales.add(this.rgb[0]);
+            this.panelOpcionesCanales.add(this.rgb[1]);
+            this.panelOpcionesCanales.add(this.rgb[2]);
+        this.panelCanales.add(this.panelOpcionesCanales);
+        
+        //Agregamos el boton
         this.panelBotones.add(this.btnOK);
+        this.panelBotones.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
+
+        //Agregamos al panel principal todos los paneles
+        this.panelPrincipal.add(this.panelMatrizPrincipal);
+        this.panelPrincipal.add(this.panelConfiguraciones);
+        this.panelPrincipal.add(this.panelCanales);
+        this.panelPrincipal.add(this.panelBotones);
         
-        //Agregamos el texto
-        this.panelTextoMatriz.add(new JLabel("Matriz"));
-        this.panelTextoMatriz.setSize(this.getWidth(), 80);
+        //Agregamos al JFrame el panel que contiene todos los paneles
+        this.add(this.panelPrincipal);
         
-        //Agregamos los paneles al JFrame
-        this.add(this.panelTextoMatriz, BorderLayout.NORTH);
-        this.add(this.panelMatriz, BorderLayout.CENTER);
-        this.add(this.panelBotones, BorderLayout.SOUTH);
+        //Configuramos la ventana principal
         this.setVisible(true);
         this.setLocationRelativeTo(null);
-        this.setSize(400, 500);
+        this.setSize(400, 420);
+        this.setResizable(false);
         this.setTitle("Matriz de Convolución");
     }
     
