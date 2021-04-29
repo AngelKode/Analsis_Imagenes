@@ -9,7 +9,6 @@ import imagenes.ManipulacionImagen;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 import org.jfree.ui.Spinner;
 
 /**
