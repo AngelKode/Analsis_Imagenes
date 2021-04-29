@@ -23,7 +23,6 @@ public class Analisis_Imagenes {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
        JFrameModificarImagenes aux = new JFrameModificarImagenes(new Dimension(500, 400));
-        //JFrameMatriz aux = new JFrameMatriz(null);
     }
 
 }

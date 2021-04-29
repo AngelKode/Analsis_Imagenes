@@ -5,25 +5,17 @@
  */
 package componentes;
 
-import imagenes.ManipulacionImagen;
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import imagenes.ManipulacionImagen;;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import javafx.scene.layout.Border;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 import listener.ListenerBotonConvolucion;
 import org.jfree.ui.Spinner;
 
@@ -112,42 +104,49 @@ public final class JFrameMatriz extends JFrame{
         panelTituloConfiguraciones.setLayout(new GridLayout(1, 2));
         
         //Paneles que contendrán el JLabel y el Spinner del divisor y el offset
+        
+        //-----------------------------DIVISOR------------------------------
         JPanel panelDivisor = new JPanel();
             panelDivisor.setLayout(new BoxLayout(panelDivisor, BoxLayout.Y_AXIS));
         JPanel panelLabelDivisor = new JPanel();
         JLabel labelDivisor = new JLabel("Divisor");
             labelDivisor.setHorizontalAlignment(JLabel.CENTER);
             panelLabelDivisor.add(labelDivisor);
-            
+            //Agregamos al panelDivisor el titulo y el Spinner
             panelDivisor.add(panelLabelDivisor);
             panelDivisor.add(this.divisor);
             panelDivisor.setBorder(BorderFactory.createEmptyBorder(15, 15,15,15));
+        //-----------------------------Offset------------------------------    
         JPanel panelOffset = new JPanel();
             panelOffset.setLayout(new BoxLayout(panelOffset, BoxLayout.Y_AXIS));
         JPanel panelLabelOffset = new JPanel();
         JLabel labelOffset = new JLabel("Offset");
             labelOffset.setHorizontalAlignment(JLabel.CENTER);
             panelLabelOffset.add(labelOffset);
-            
+            //Agregamos al panelOffset el titulo y el Spinner
             panelOffset.add(panelLabelOffset);
             panelOffset.add(this.offset);
             panelOffset.setBorder(BorderFactory.createEmptyBorder(15, 15,15,15));
-            
+        
+        //Agregamos al panel principal ambos paneles
         this.panelConfiguraciones.add(panelDivisor);
         this.panelConfiguraciones.add(panelOffset);
         
         //Agregamos la configuracion de los canales
-        //Configuramos el panel de los canales
+        //Configuramos el JLabel
         JLabel tituloCanales = new JLabel("Canales");
             tituloCanales.setHorizontalAlignment(JLabel.CENTER);
             tituloCanales.setFont(new Font("Arial", Font.BOLD, 16));
+        //Agregamos el JLabel al panel
         this.panelCanales.add(new JPanel().add(tituloCanales));
-            this.panelOpcionesCanales.add(this.rgb[0]);
-            this.panelOpcionesCanales.add(this.rgb[1]);
-            this.panelOpcionesCanales.add(this.rgb[2]);
+        //Agegamos las opciones al panel que contiene las opciones
+        this.panelOpcionesCanales.add(this.rgb[0]);
+        this.panelOpcionesCanales.add(this.rgb[1]);
+        this.panelOpcionesCanales.add(this.rgb[2]);
+        //Agregamos el panel de las opciones al panel principal
         this.panelCanales.add(this.panelOpcionesCanales);
         
-        //Agregamos el boton
+        //Agregamos el boton al panel de botones
         this.panelBotones.add(this.btnOK);
         this.panelBotones.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
 
