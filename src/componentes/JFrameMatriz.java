@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import listener.ListenerBotonConvolucion;
+import listener.ListenerBotonFiltrosKirsch;
 import org.jfree.ui.Spinner;
 
 /**
@@ -28,14 +29,15 @@ public final class JFrameMatriz extends JFrame{
     private static final int tamanioMatriz = 5;
     private final Spinner[][] matriz;
     private final Spinner divisor, offset;
-    private final JButton btnOK;
+    private final JButton btnOKMatriz, btnAplicarFiltros;
     private final JRadioButton rgb[];
-    private final JPanel panelPrincipal,panelMatrizPrincipal, panelMatriz ,panelBotones, panelConfiguraciones, panelCanales, panelOpcionesCanales;
+    private final JPanel panelPrincipal,panelMatrizPrincipal, panelMatriz ,panelBotones, panelConfiguraciones, 
+                         panelCanales, panelOpcionesCanales, panelAplicarFiltros;
     private final ManipulacionImagen manipulador;
     
     public JFrameMatriz(ManipulacionImagen manipulador){
         this.matriz = new Spinner[tamanioMatriz][tamanioMatriz];
-        this.btnOK = new JButton("Aceptar");
+        this.btnOKMatriz = new JButton("Aceptar");
         
         this.rgb = new JRadioButton[3];
         this.rgb[0] = new JRadioButton("Red");
@@ -60,6 +62,9 @@ public final class JFrameMatriz extends JFrame{
         this.panelCanales = new JPanel(new GridLayout(2, 1));
         this.panelOpcionesCanales = new JPanel(new FlowLayout(FlowLayout.CENTER));
         
+        this.panelAplicarFiltros = new JPanel();
+        this.btnAplicarFiltros = new JButton("Aplicar Filtro");
+        
         this.manipulador = manipulador;
         this.divisor = new Spinner(0);
         this.offset = new Spinner(0);
@@ -70,8 +75,12 @@ public final class JFrameMatriz extends JFrame{
     
     public void initListeners(){
         ListenerBotonConvolucion listener = new ListenerBotonConvolucion(this.manipulador, this.matriz, this.divisor,this.offset, this.rgb);
-        this.btnOK.addActionListener(listener);
-        this.btnOK.setActionCommand("btnOK");
+        this.btnOKMatriz.addActionListener(listener);
+        this.btnOKMatriz.setActionCommand("btnOK");
+        
+        ListenerBotonFiltrosKirsch listenerFiltros = new ListenerBotonFiltrosKirsch(this.manipulador, this.divisor, this.offset, this.rgb);
+        this.btnAplicarFiltros.addActionListener(listenerFiltros);
+        this.btnAplicarFiltros.setActionCommand("btnAplicarFiltrosKirsch");
     }
     public void initComponents(){
         
@@ -146,14 +155,19 @@ public final class JFrameMatriz extends JFrame{
         //Agregamos el panel de las opciones al panel principal
         this.panelCanales.add(this.panelOpcionesCanales);
         
+        //-----------------Configuramos el panel de los Filtros-----------------
+        this.panelAplicarFiltros.setLayout(new BoxLayout(this.panelAplicarFiltros, BoxLayout.X_AXIS));
+        this.panelAplicarFiltros.add(this.btnAplicarFiltros);
+        
         //Agregamos el boton al panel de botones
-        this.panelBotones.add(this.btnOK);
+        this.panelBotones.add(this.btnOKMatriz);
         this.panelBotones.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
 
         //Agregamos al panel principal todos los paneles
         this.panelPrincipal.add(this.panelMatrizPrincipal);
         this.panelPrincipal.add(this.panelConfiguraciones);
         this.panelPrincipal.add(this.panelCanales);
+        this.panelPrincipal.add(this.panelAplicarFiltros);
         this.panelPrincipal.add(this.panelBotones);
         
         //Agregamos al JFrame el panel que contiene todos los paneles
@@ -163,7 +177,6 @@ public final class JFrameMatriz extends JFrame{
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setSize(400, 420);
-        this.setResizable(false);
         this.setTitle("Matriz de Convolución");
     }
     

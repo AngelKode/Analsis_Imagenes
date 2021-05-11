@@ -6,14 +6,17 @@
 package imagenes;
 
 import componentes.JFrameModificarImagenes;
+import filtros.MascarasBordes;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import org.opencv.core.Core;
 
 /**
  *
@@ -253,7 +256,6 @@ public class ManipulacionImagen {
     public void setConvolucion(int valores[][], int divisor, int offset, boolean red, boolean green, boolean blue){
         for(int w = 0; w < this.width; w++){
             for(int h = 0; h < this.height; h++){
-                
                 //Obtenemos el pixel actual
                 Color colorActual = new Color(this.buffer_original.getRGB(w, h));
                 
@@ -280,17 +282,19 @@ public class ManipulacionImagen {
                             
                             //Hacemos la multiplicacion del tono con el valor del kernel dependiendo de los canales seleccionados
                             int multiplicacionRed = 0, multiplicacionGreen = 0, multiplicacionBlue = 0;
-
+                            int renglon = posicionHeight - posInicialHMatriz;
+                            int columna = posicionWidth - posInicialWMatriz;
+                            
                             if(red){
-                                multiplicacionRed = (_red * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                                multiplicacionRed = (_red * valores[renglon][columna]);
                                 sumatoriaOperacionRed += multiplicacionRed;//Sumamos el resultado
                             }
                             if(green){
-                                multiplicacionGreen = (_green * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                                multiplicacionGreen = (_green * valores[renglon][columna]);
                                 sumatoriaOperacionGreen += multiplicacionGreen;//Sumamos el resultado
                             }
                             if(blue){
-                                multiplicacionBlue = (_blue * valores[posicionHeight - posInicialHMatriz][posicionWidth - posInicialWMatriz]);
+                                multiplicacionBlue = (_blue * valores[renglon][columna]);
                                 sumatoriaOperacionBlue += multiplicacionBlue;//Sumamos el resultado
                             }
                             
@@ -334,6 +338,102 @@ public class ManipulacionImagen {
         }
     }
     
+    
+    public void setFiltrosAcumulativosKirsch(int divisor, int offset, boolean red, boolean green, boolean blue){
+        //Clase para obtener los filtros
+        MascarasBordes mascaras = new MascarasBordes();
+        
+        //Hacemos el filtro iterativo con cada mascara
+        for(double[][] mascara : mascaras.getMascaras()){
+            for(int w = 0; w < this.width; w++){
+                for(int h = 0; h < this.height; h++){
+                    //Obtenemos el pixel actual
+                    Color colorActual = new Color(this.buffer_original.getRGB(w, h));
+                    
+                    //Creamos una variable para guardar la sumatorias de cada canal, pero si no esta habilitado
+                    //algun canal, su valor será el valor del pixel actual
+                    int sumatoriaOperacionRed = (red) ? 0 : colorActual.getRed();
+                    int sumatoriaOperacionGreen =  (green) ? 0 : colorActual.getGreen();
+                    int sumatoriaOperacionBlue =  (blue) ? 0 : colorActual.getBlue();
+                    
+                    //Obtenemos la posicion inicial de la matriz en la imagen para poder hacer
+                    //las operaciones
+                    int posInicialWMatriz = w - 2;
+                    int posInicialHMatriz = h - 2;
+                    //Hacemos la operacion de la matriz
+                    for(int posicionWidth = w - 2; posicionWidth < (w-2) + 5;  posicionWidth++){
+                        for(int posicionHeight = h - 2; posicionHeight < (h-2) + 5; posicionHeight++){
+                        //Evaluamos si la posicion es valida dentro de la imagen
+                            if(isValidValue(posicionWidth, posicionHeight)){
+                                //Obtenemos el valor de el pixel
+                                Color pixelActual = new Color(this.buffer_original.getRGB(posicionWidth,posicionHeight));
+                                int _red = pixelActual.getRed();
+                                int _green = pixelActual.getGreen();
+                                int _blue = pixelActual.getBlue();
+                            
+                                //Hacemos la multiplicacion del tono con el valor del kernel dependiendo de los canales seleccionados
+                                int multiplicacionRed = 0, multiplicacionGreen = 0, multiplicacionBlue = 0;
+                                int renglon = posicionHeight - posInicialHMatriz;
+                                int columna = posicionWidth - posInicialWMatriz;
+
+                                if(red){
+                                    multiplicacionRed = (_red * (int)mascara[renglon][columna]);
+                                    sumatoriaOperacionRed += multiplicacionRed;//Sumamos el resultado
+                                }
+                                if(green){
+                                    multiplicacionGreen = (_green * (int)mascara[renglon][columna]);
+                                    sumatoriaOperacionGreen += multiplicacionGreen;//Sumamos el resultado
+                                }
+                                if(blue){
+                                    multiplicacionBlue = (_blue * (int)mascara[renglon][columna]);
+                                    sumatoriaOperacionBlue += multiplicacionBlue;//Sumamos el resultado
+                                }
+                            
+                            }
+                        }    
+                    }
+                
+                    //Checamos si hay valores en divisor diferentes de 0
+                    divisor = (divisor != 0) ? divisor : 1;
+                
+                    //Hacemos la division y el offset, dependiendo las selecciones de canales
+                    if(red){
+                        sumatoriaOperacionRed /= divisor;
+                        //Agregamos el offset
+                        sumatoriaOperacionRed += offset;
+
+                        //Verificamos que las sumatorias entren en un rango de 0 a 255
+                        sumatoriaOperacionRed = checarValorColor(sumatoriaOperacionRed);
+                    }
+                    if(green){
+                        sumatoriaOperacionGreen /= divisor;
+                        //Agregamos el offset
+                        sumatoriaOperacionGreen += offset;
+
+                        //Verificamos que las sumatorias entren en un rango de 0 a 255
+                        sumatoriaOperacionGreen = checarValorColor(sumatoriaOperacionGreen);
+                    }
+                    if(blue){
+                        sumatoriaOperacionBlue /= divisor;
+                        //Agregamos el offset
+                        sumatoriaOperacionBlue += offset;
+
+                        //Verificamos que las sumatorias entren en un rango de 0 a 255
+                        sumatoriaOperacionBlue = checarValorColor(sumatoriaOperacionBlue);
+                    }
+
+                    //Seteamos el nuevo color
+                    Color colorNuevo = new Color(sumatoriaOperacionRed, sumatoriaOperacionGreen, sumatoriaOperacionBlue);
+                    this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());
+                    
+                }
+            }
+            //Ahora actualizamos lo que tiene buffer original
+            this.buffer_original = this.buffer_cambiada;
+        }
+    }
+    
+    
     private int obtenerNuevoUmbral(int umbral_actual){
         /*Ahora comparamos ambos espectros del umbral actual
          Obtenemos el resultado de el promedio de cada uno de los espectros, y retornamos el promedio 
@@ -374,6 +474,11 @@ public class ManipulacionImagen {
         g.drawImage(source, 0, 0, null);
         g.dispose();
         return newBuffer;
+    }
+    
+    public void guardarImagen() throws IOException{
+        File archivo = new File("C:\\Users\\depot\\Desktop\\Imagen.jpg");
+        ImageIO.write(this.buffer_cambiada,"jpg", archivo);
     }
     
     private int checarColor(int valorColor){

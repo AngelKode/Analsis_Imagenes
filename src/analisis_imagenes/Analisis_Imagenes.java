@@ -6,6 +6,7 @@
 package analisis_imagenes;
 
 //import componentes.JFrameMatriz;
+import componentes.JFrameMatriz;
 import java.awt.Dimension;
 import java.io.IOException;
 import componentes.JFrameModificarImagenes;
@@ -23,6 +24,8 @@ public class Analisis_Imagenes {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
        JFrameModificarImagenes aux = new JFrameModificarImagenes(new Dimension(500, 400));
+       // JFrameMatriz matriz = new JFrameMatriz(null);
+        
     }
 
 }

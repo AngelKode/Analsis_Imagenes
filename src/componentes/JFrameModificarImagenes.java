@@ -34,9 +34,10 @@ public class JFrameModificarImagenes extends JFrame{
         ArrayList<String[]> actionCommandsItems = new ArrayList<>();
         
         //Creamos los items del primer menu
-        items.add(new String[]{"Abrir imagen"});
+        items.add(new String[]{"Abrir imagen", "Guardar imagen"});
         //Accion que detectará el item listener
-        actionCommandsItems.add(new String[]{"AbrirImagen"});
+        actionCommandsItems.add(new String[]{"AbrirImagen", "GuardarImagen"});
+        
         
         //Creamos los items del segundo menu
         items.add(new String[]{"Escala de Grises", "Negativo","Binarizar","Binarizacion Automática","Modificar Iluminación",

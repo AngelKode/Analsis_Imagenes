@@ -22,6 +22,8 @@ import componentes.JFrameModificarImagenes;
 import componentes.JSliderUmbral;
 import graficas.Graficador;
 import java.awt.GridLayout;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.jfree.chart.ChartPanel;
 
@@ -97,6 +99,17 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
                     ex.printStackTrace();
                 }
                 break;
+            }
+            case "GuardarImagen":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    try {
+                        this.manipulador.guardarImagen();
+                    } catch (IOException ex) {
+                        Logger.getLogger(MenuOptionImage.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             }
             case "EscalaGrises":{
                 if(isLabelNull()){
