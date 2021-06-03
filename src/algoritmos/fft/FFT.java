@@ -16,7 +16,7 @@ public class FFT {
     //Definiendo los atributos de la clase
     private ArrayList<Double> muestras_x;//Aqui tendremos las muestras ingresadas por el usuario
     private ArrayList<Double> muestras_x_r;
-    private final ArrayList<Double> transformada_X;//Aqui tendremos las transformadas de la muestra
+    private ArrayList<Double> transformada_X;//Aqui tendremos las transformadas de la muestra
     private final ArrayList<Double> transformadaR_X;
     private int N;
 
@@ -161,6 +161,7 @@ public class FFT {
     }
     
     public void setMuestrasTransformada(ArrayList<Double> muestras){
+        this.transformada_X = new ArrayList<>();
         this.muestras_x = muestras;
     }
     

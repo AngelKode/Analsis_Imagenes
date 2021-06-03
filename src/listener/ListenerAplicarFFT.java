@@ -31,7 +31,9 @@ public class ListenerAplicarFFT implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("AplicarFFT")){
-            this.manipulador.setFFT(this.red.isSelected(), this.green.isSelected(), this.blue.isSelected());
+            this.manipulador.setFFT();
+            this.manipulador.getFrame().revalidate();
+            this.manipulador.getFrame().repaint();
         }
     }
     

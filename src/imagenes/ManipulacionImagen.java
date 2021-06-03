@@ -18,7 +18,6 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import org.opencv.core.Core;
 
 /**
  *
@@ -535,20 +534,27 @@ public class ManipulacionImagen {
         }
     }
     
-    public void setFFT(boolean isRedAvailable, boolean isGreenAvailable, boolean isBlueAvailable){
+    public void setFFT(){
         this.setEscalaGrisesImagen();
         FFT fft = new FFT();
         Color color;
         
-        //Aplicamos la FFT vertical
+        //Aplicamos la FFT
+        aplicarFFTVertical();
+        aplicarFFTHorizontal();
+    }
+    
+    private void aplicarFFTVertical(){
+        FFT fft = new FFT();
+        Color color;
+        
         for(int w = 0; w < this.width; w++){
-            //Aqui guardaremos los puntos de muestra, que son todos los pixeles en vertical
             ArrayList<Double> puntos_muestra_red = new ArrayList<>();
             ArrayList<Double> puntos_muestra_green = new ArrayList<>();
             ArrayList<Double> puntos_muestra_blue = new ArrayList<>();
             
             for(int h = 0; h < this.height; h++){
-                color = new Color(this.buffer_original.getRGB(w, h));
+                color = new Color(this.buffer_cambiada.getRGB(h, w));
                 puntos_muestra_red.add((double)color.getRed());
                 puntos_muestra_green.add((double)color.getGreen());
                 puntos_muestra_blue.add((double)color.getBlue());
@@ -573,15 +579,19 @@ public class ManipulacionImagen {
             //Obtenemos los puntos de la operacion
             ArrayList<Double> fft_resultados_blue = fft.getTransformadaDiscreta_X();
             
-            
             //Ahora esos valores, los seteamos de nuevo en la imagen
             for(int numPixel = 0; numPixel < this.height; numPixel++){
-                Color nuevoColor = new Color(checarColor(fft_resultados_red.get(numPixel).intValue()), checarColor(fft_resultados_green.get(numPixel).intValue()),checarColor(fft_resultados_blue.get(numPixel).intValue()));
-                this.buffer_cambiada.setRGB(w, numPixel,nuevoColor.getRGB());
+                Color nuevoColor = new Color(checarColor(fft_resultados_red.get(numPixel).intValue()), 
+                                             checarColor(fft_resultados_green.get(numPixel).intValue()),
+                                             checarColor(fft_resultados_blue.get(numPixel).intValue()));
+                this.buffer_cambiada.setRGB(numPixel,w,nuevoColor.getRGB());
             }
-
         }
-        
+    }
+    
+    private void aplicarFFTHorizontal(){
+        FFT fft = new FFT();
+        Color color;
         //Ahora en horizontal
         for(int h = 0; h < this.height; h++){
             //Aqui guardaremos los puntos de muestra, que son todos los pixeles en vertical
@@ -590,7 +600,7 @@ public class ManipulacionImagen {
             ArrayList<Double> puntos_muestra_blue = new ArrayList<>();
             
             for(int w = 0; w < this.width; w++){
-                color = new Color(this.buffer_cambiada.getRGB(w, h));
+                color = new Color(this.buffer_cambiada.getRGB(h,w));
                 puntos_muestra_red.add((double)color.getRed());
                 puntos_muestra_green.add((double)color.getGreen());
                 puntos_muestra_blue.add((double)color.getBlue());
@@ -618,7 +628,7 @@ public class ManipulacionImagen {
             //Ahora esos valores, los seteamos de nuevo en la imagen
             for(int numPixel = 0; numPixel < this.width - 1; numPixel++){
                 Color nuevoColor = new Color(checarColor(fft_resultados_red.get(numPixel).intValue()), checarColor(fft_resultados_green.get(numPixel).intValue()),checarColor(fft_resultados_blue.get(numPixel).intValue()));
-                this.buffer_cambiada.setRGB(numPixel, h, nuevoColor.getRGB());
+                this.buffer_cambiada.setRGB(h,numPixel, nuevoColor.getRGB());
             }
         }
     }

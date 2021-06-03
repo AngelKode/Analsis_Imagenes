@@ -24,20 +24,8 @@ public class Analisis_Imagenes {
      * @throws java.lang.InterruptedException
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-       //JFrameModificarImagenes aux = new JFrameModificarImagenes(new Dimension(500, 400));
+       JFrameModificarImagenes aux = new JFrameModificarImagenes(new Dimension(500, 400));
        //JFrameMatriz matriz = new JFrameMatriz(null);
-        //JFrameRuido aux = new JFrameRuido(null);
-       //TODO
-       //Checar funcionamiento FFT
-//       FFT fft = new FFT();
-//       ArrayList<Double> lista = new ArrayList<>();
-//       
-//       for(int i = 0; i < 2000; i++){
-//           lista.add(Math.random() * 30);
-//       }
-//       fft.setMuestrasTransformada_R(lista);
-//       fft.operacion_TransformadaFourierR();
-
     }
 
 }
