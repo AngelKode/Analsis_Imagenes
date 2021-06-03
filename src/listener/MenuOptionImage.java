@@ -5,6 +5,7 @@
  */
 package listener;
 
+import componentes.JFrameFFT;
 import componentes.JFrameMatriz;
 import imagenes.ManipulacionImagen;
 import java.awt.event.ActionEvent;
@@ -19,6 +20,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import componentes.JFrameModificarImagenes;
+import componentes.JFrameRuido;
 import componentes.JSliderUmbral;
 import graficas.Graficador;
 import java.awt.GridLayout;
@@ -272,6 +274,24 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
                     JFrameMatriz matrizConvolucion = new JFrameMatriz(this.manipulador);
                 }
                 break;
+            }
+            case "Ruido":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    JFrameRuido frame = new JFrameRuido(this.manipulador);
+                }
+                break;
+            }
+            case "FFT":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    JFrameFFT fft = new JFrameFFT(this.manipulador);
+                    this.manipulador.getFrame().revalidate();
+                    this.manipulador.getFrame().repaint();
+                }
+                break; 
             }
             default:{
                 if(!isLabelNull()){

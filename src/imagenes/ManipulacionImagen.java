@@ -5,6 +5,7 @@
  */
 package imagenes;
 
+import algoritmos.fft.FFT;
 import componentes.JFrameModificarImagenes;
 import filtros.MascarasBordes;
 import java.awt.Color;
@@ -12,6 +13,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
@@ -27,7 +29,7 @@ public class ManipulacionImagen {
     private JFrameModificarImagenes frame;
     private BufferedImage buffer_original,buffer_cambiada;
     private JLabel imagen;
-    private int height,width;
+    private int height,width, cantidadPixeles;
     private int[] red;
     private int[] green;
     private int[] blue;
@@ -41,6 +43,7 @@ public class ManipulacionImagen {
         this.imagen = null;
         this.width = 0;
         this.height = 0;
+        this.cantidadPixeles = 0;
         this.red = new int[256];
         this.green = new int[256];
         this.blue = new int[256];
@@ -58,6 +61,7 @@ public class ManipulacionImagen {
         
         this.width = this.buffer_original.getWidth();
         this.height = this.buffer_original.getHeight();
+        this.cantidadPixeles = this.width * this.height;
         
         //Creamos un label con la imagen
         this.imagen = new JLabel(new ImageIcon(this.buffer_cambiada));
@@ -433,6 +437,191 @@ public class ManipulacionImagen {
         }
     }
     
+    public void setRuidoImagen(int porcentaje, boolean isSal, boolean isPimienta){
+        double porc = ((double)porcentaje / (double)100);
+        double cantidadPixelesCambiar = cantidadPixeles * (double)porc; 
+        int rango = (int)this.cantidadPixeles / (int)cantidadPixelesCambiar;
+        int inicio = 0;
+        
+        //Verificamos que tipo de ruido se va a aplicar
+        if(isSal && isPimienta){
+        
+        }
+        
+        if(isSal){
+            for(int w = 0; w < this.width; w++){
+                for(int h = 0; h < this.height; h++){
+                  //Si es igual, damos ruido al pixel
+                  if(inicio == rango){
+                      //Obtenemos el pixel actual
+                      Color colorActual = new Color(this.buffer_original.getRGB(w, h));
+
+                      int mayorRed = 0;
+                      int mayorGreen =  0;
+                      int mayorBlue = 0;
+
+                      //Hacemos la operacion de la matriz
+                      for(int posicionWidth = w - 2; posicionWidth < (w-2) + 5;  posicionWidth++){
+                          for(int posicionHeight = h - 2; posicionHeight < (h-2) + 5; posicionHeight++){
+                              //Evaluamos si la posicion es valida dentro de la imagen
+                              if(isValidValue(posicionWidth, posicionHeight)){
+                                  //Obtenemos el valor de el pixel
+                                  Color pixelActual = new Color(this.buffer_original.getRGB(posicionWidth,posicionHeight));
+                                  //Checamos si es el mayor o no
+                                  if(pixelActual.getRed() < mayorRed){
+                                      mayorRed = pixelActual.getRed();
+                                  }
+                                  if(pixelActual.getGreen() < mayorGreen){
+                                      mayorGreen = pixelActual.getGreen();
+                                  }
+                                  if(pixelActual.getBlue() < mayorBlue){
+                                      mayorBlue = pixelActual.getBlue();
+                                  }
+                              }
+                          }    
+                      }
+
+                      //Seteamos el nuevo color
+                      Color colorNuevo = new Color(mayorRed,mayorGreen,mayorBlue);
+                      this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());
+                      inicio = 0;//Reiniciamos el contador
+                  }
+                  inicio++;
+                }
+            }  
+        }
+        
+        if(isPimienta){
+            for(int w = 0; w < this.width; w++){
+                for(int h = 0; h < this.height; h++){
+                    //Si es igual, damos ruido al pixel
+                    if(inicio == rango){
+                        //Obtenemos el pixel actual
+                        Color colorActual = new Color(this.buffer_original.getRGB(w, h));
+
+                        int mayorRed = 0;
+                        int mayorGreen =  0;
+                        int mayorBlue = 0;
+
+                        //Hacemos la operacion de la matriz
+                        for(int posicionWidth = w - 2; posicionWidth < (w-2) + 5;  posicionWidth++){
+                            for(int posicionHeight = h - 2; posicionHeight < (h-2) + 5; posicionHeight++){
+                                //Evaluamos si la posicion es valida dentro de la imagen
+                                if(isValidValue(posicionWidth, posicionHeight)){
+                                    //Obtenemos el valor de el pixel
+                                    Color pixelActual = new Color(this.buffer_original.getRGB(posicionWidth,posicionHeight));
+                                    //Checamos si es el mayor o no
+                                    if(pixelActual.getRed() > mayorRed){
+                                        mayorRed = pixelActual.getRed();
+                                    }
+                                    if(pixelActual.getGreen() > mayorGreen){
+                                        mayorGreen = pixelActual.getGreen();
+                                    }
+                                    if(pixelActual.getBlue() > mayorBlue){
+                                        mayorBlue = pixelActual.getBlue();
+                                    }
+                                }
+                            }    
+                        }
+
+                        //Seteamos el nuevo color
+                        Color colorNuevo = new Color(mayorRed,mayorGreen,mayorBlue);
+                        this.buffer_cambiada.setRGB(w, h, colorNuevo.getRGB());
+                        inicio = 0;//Reiniciamos el contador
+                    }
+                    inicio++;
+                }
+            }
+        }
+    }
+    
+    public void setFFT(boolean isRedAvailable, boolean isGreenAvailable, boolean isBlueAvailable){
+        this.setEscalaGrisesImagen();
+        FFT fft = new FFT();
+        Color color;
+        
+        //Aplicamos la FFT vertical
+        for(int w = 0; w < this.width; w++){
+            //Aqui guardaremos los puntos de muestra, que son todos los pixeles en vertical
+            ArrayList<Double> puntos_muestra_red = new ArrayList<>();
+            ArrayList<Double> puntos_muestra_green = new ArrayList<>();
+            ArrayList<Double> puntos_muestra_blue = new ArrayList<>();
+            
+            for(int h = 0; h < this.height; h++){
+                color = new Color(this.buffer_original.getRGB(w, h));
+                puntos_muestra_red.add((double)color.getRed());
+                puntos_muestra_green.add((double)color.getGreen());
+                puntos_muestra_blue.add((double)color.getBlue());
+            }
+            
+            //Con los puntos muestra, aplicamos la FFT
+            fft.setMuestrasTransformada(puntos_muestra_red);
+            fft.operacion_TransformadaFourierD();
+            
+            //Obtenemos los puntos de la operacion
+            ArrayList<Double> fft_resultados_red = fft.getTransformadaDiscreta_X();
+            
+            fft.setMuestrasTransformada(puntos_muestra_green);
+            fft.operacion_TransformadaFourierD();
+            
+            //Obtenemos los puntos de la operacion
+            ArrayList<Double> fft_resultados_green = fft.getTransformadaDiscreta_X();
+            
+            fft.setMuestrasTransformada(puntos_muestra_blue);
+            fft.operacion_TransformadaFourierD();
+            
+            //Obtenemos los puntos de la operacion
+            ArrayList<Double> fft_resultados_blue = fft.getTransformadaDiscreta_X();
+            
+            
+            //Ahora esos valores, los seteamos de nuevo en la imagen
+            for(int numPixel = 0; numPixel < this.height; numPixel++){
+                Color nuevoColor = new Color(checarColor(fft_resultados_red.get(numPixel).intValue()), checarColor(fft_resultados_green.get(numPixel).intValue()),checarColor(fft_resultados_blue.get(numPixel).intValue()));
+                this.buffer_cambiada.setRGB(w, numPixel,nuevoColor.getRGB());
+            }
+
+        }
+        
+        //Ahora en horizontal
+        for(int h = 0; h < this.height; h++){
+            //Aqui guardaremos los puntos de muestra, que son todos los pixeles en vertical
+            ArrayList<Double> puntos_muestra_red = new ArrayList<>();
+            ArrayList<Double> puntos_muestra_green = new ArrayList<>();
+            ArrayList<Double> puntos_muestra_blue = new ArrayList<>();
+            
+            for(int w = 0; w < this.width; w++){
+                color = new Color(this.buffer_cambiada.getRGB(w, h));
+                puntos_muestra_red.add((double)color.getRed());
+                puntos_muestra_green.add((double)color.getGreen());
+                puntos_muestra_blue.add((double)color.getBlue());
+            }
+            
+            //Con los puntos muestra, aplicamos la FFT
+            fft.setMuestrasTransformada(puntos_muestra_red);
+            fft.operacion_TransformadaFourierD();
+            
+            //Obtenemos los puntos de la operacion
+            ArrayList<Double> fft_resultados_red = fft.getTransformadaDiscreta_X();
+            
+            fft.setMuestrasTransformada(puntos_muestra_green);
+            fft.operacion_TransformadaFourierD();
+            
+            //Obtenemos los puntos de la operacion
+            ArrayList<Double> fft_resultados_green = fft.getTransformadaDiscreta_X();
+            
+            fft.setMuestrasTransformada(puntos_muestra_blue);
+            fft.operacion_TransformadaFourierD();
+            
+            //Obtenemos los puntos de la operacion
+            ArrayList<Double> fft_resultados_blue = fft.getTransformadaDiscreta_X();
+            
+            //Ahora esos valores, los seteamos de nuevo en la imagen
+            for(int numPixel = 0; numPixel < this.width - 1; numPixel++){
+                Color nuevoColor = new Color(checarColor(fft_resultados_red.get(numPixel).intValue()), checarColor(fft_resultados_green.get(numPixel).intValue()),checarColor(fft_resultados_blue.get(numPixel).intValue()));
+                this.buffer_cambiada.setRGB(numPixel, h, nuevoColor.getRGB());
+            }
+        }
+    }
     
     private int obtenerNuevoUmbral(int umbral_actual){
         /*Ahora comparamos ambos espectros del umbral actual
