@@ -34,7 +34,10 @@ public class ManipulacionImagen {
     private int[] blue;
     private int valorMinimoR1, valorMaximoR2;
     private int valorExpansiones;
-
+    private ArrayList[] frecuenciasRed;
+    private ArrayList[] frecuenciasGreen;
+    private ArrayList[] frecuenciasBlue;
+    
     public ManipulacionImagen(JFrameModificarImagenes frame) throws IOException {
         this.frame = frame;
         this.buffer_original = null;
@@ -536,8 +539,6 @@ public class ManipulacionImagen {
     
     public void setFFT(){
         this.setEscalaGrisesImagen();
-        FFT fft = new FFT();
-        Color color;
         
         //Aplicamos la FFT
         aplicarFFTVertical();
@@ -554,7 +555,7 @@ public class ManipulacionImagen {
             ArrayList<Double> puntos_muestra_blue = new ArrayList<>();
             
             for(int h = 0; h < this.height; h++){
-                color = new Color(this.buffer_cambiada.getRGB(h, w));
+                color = new Color(this.buffer_cambiada.getRGB(w,h));
                 puntos_muestra_red.add((double)color.getRed());
                 puntos_muestra_green.add((double)color.getGreen());
                 puntos_muestra_blue.add((double)color.getBlue());
@@ -580,11 +581,11 @@ public class ManipulacionImagen {
             ArrayList<Double> fft_resultados_blue = fft.getTransformadaDiscreta_X();
             
             //Ahora esos valores, los seteamos de nuevo en la imagen
-            for(int numPixel = 0; numPixel < this.height; numPixel++){
+            for(int numPixel = 0; numPixel < this.height - 1; numPixel++){
                 Color nuevoColor = new Color(checarColor(fft_resultados_red.get(numPixel).intValue()), 
                                              checarColor(fft_resultados_green.get(numPixel).intValue()),
                                              checarColor(fft_resultados_blue.get(numPixel).intValue()));
-                this.buffer_cambiada.setRGB(numPixel,w,nuevoColor.getRGB());
+                this.buffer_cambiada.setRGB(w,numPixel,nuevoColor.getRGB());
             }
         }
     }
@@ -600,7 +601,7 @@ public class ManipulacionImagen {
             ArrayList<Double> puntos_muestra_blue = new ArrayList<>();
             
             for(int w = 0; w < this.width; w++){
-                color = new Color(this.buffer_cambiada.getRGB(h,w));
+                color = new Color(this.buffer_cambiada.getRGB(w,h));
                 puntos_muestra_red.add((double)color.getRed());
                 puntos_muestra_green.add((double)color.getGreen());
                 puntos_muestra_blue.add((double)color.getBlue());
@@ -612,25 +613,218 @@ public class ManipulacionImagen {
             
             //Obtenemos los puntos de la operacion
             ArrayList<Double> fft_resultados_red = fft.getTransformadaDiscreta_X();
-            
+
+                
             fft.setMuestrasTransformada(puntos_muestra_green);
             fft.operacion_TransformadaFourierD();
             
             //Obtenemos los puntos de la operacion
             ArrayList<Double> fft_resultados_green = fft.getTransformadaDiscreta_X();
-            
+
             fft.setMuestrasTransformada(puntos_muestra_blue);
             fft.operacion_TransformadaFourierD();
             
             //Obtenemos los puntos de la operacion
             ArrayList<Double> fft_resultados_blue = fft.getTransformadaDiscreta_X();
-            
+
             //Ahora esos valores, los seteamos de nuevo en la imagen
             for(int numPixel = 0; numPixel < this.width - 1; numPixel++){
                 Color nuevoColor = new Color(checarColor(fft_resultados_red.get(numPixel).intValue()), checarColor(fft_resultados_green.get(numPixel).intValue()),checarColor(fft_resultados_blue.get(numPixel).intValue()));
-                this.buffer_cambiada.setRGB(h,numPixel, nuevoColor.getRGB());
+                this.buffer_cambiada.setRGB(numPixel,h, nuevoColor.getRGB());
             }
         }
+    }
+    
+    public void obtenerFiltroIdeal_PasaBajas(int radioFiltro){
+        
+        int pixelCentral_X = this.width / 2;
+        int pixelCentral_Y = this.height / 2;
+        double distanciaAlCentro = 0;
+        
+        //Primero aplico la transformada
+        setFFT();
+        BufferedImage buffer_filtro = cloneImage();
+        
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height; h++){
+                //Obtenemos el pixel
+                Color color = new Color(this.buffer_cambiada.getRGB(w, h));
+                distanciaAlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
+                System.out.println(distanciaAlCentro);
+                //Checamos la distancia del punto actual al centro
+                
+                if(distanciaAlCentro <= radioFiltro){
+                    //Si es menor o igual, vale 1 el pixel actual
+                    buffer_filtro.setRGB(w, h, Color.WHITE.getRGB());
+                }else{
+                    //Si no, vale 0
+                    buffer_filtro.setRGB(w, h, Color.BLACK.getRGB());
+                }
+            }
+        }
+        this.buffer_cambiada.setData(buffer_filtro.getRaster());
+    }
+    
+    
+    public void obtenerFiltroIdeal_PasaAltas(int radioFiltro){
+        
+        int pixelCentral_X = this.width / 2;
+        int pixelCentral_Y = this.height / 2;
+        double distanciaAlCentro = 0;
+        
+        //Primero aplico la transformada
+        setFFT();
+        BufferedImage buffer_filtro = cloneImage();
+        
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height; h++){
+                //Obtenemos el pixel
+                Color color = new Color(this.buffer_cambiada.getRGB(w, h));
+                distanciaAlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
+                
+                //Checamos la distancia del punto actual al centro
+                if(distanciaAlCentro >= radioFiltro){
+                    //Si es menor o igual, vale 1 el pixel actual
+                    buffer_filtro.setRGB(w, h, Color.WHITE.getRGB());
+                }else{
+                    //Si no, vale 0
+                    buffer_filtro.setRGB(w, h, Color.BLACK.getRGB());
+                }
+            }
+        }
+        this.buffer_cambiada.setData(buffer_filtro.getRaster());
+    
+    }
+    
+    public void obtenerFiltroButterworth_PasaBajas(int ordenFiltro, int radioFiltro){
+        
+        setFFT();
+        double distancia_AlCentro  = 0.0;
+        int pixelCentral_X = this.width / 2;
+        int pixelCentral_Y = this.height / 2;
+        
+        BufferedImage bufferFiltro = cloneImage();
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height; h++){
+                //Obtenemos el pixel
+                Color color = new Color(this.buffer_cambiada.getRGB(w, h));
+                
+                //Obtenemos la distancia del pixel actual al centro
+                distancia_AlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
+                
+                //Obtenemos el valor del filtro
+                double valorDivision = (double)(distancia_AlCentro) / (double)(radioFiltro);
+                double porcentajeFiltro = (double)1 / (double)(1 + Math.pow(valorDivision, 2 * ordenFiltro));
+                
+                //Dependiendo el valor del filtro, obtenemos el color del pixel
+                int colorNuevo = 0;
+                colorNuevo = ((int)(porcentajeFiltro * (double)255));
+                
+                //Asignamos el color al pixel del filtro
+                bufferFiltro.setRGB(w, h, new Color(colorNuevo,colorNuevo,colorNuevo).getRGB());
+            }
+        }
+        
+        //Asignamos al buffer que se muestra los resultados obtenimos
+        this.buffer_cambiada.setData(bufferFiltro.getRaster());
+    }
+    
+    public void obtenerFiltroButterworth_PasaAltas(int ordenFiltro, int radioFiltro){
+        //Primero aplico la transformada
+        setFFT();
+        double distancia_AlCentro  = 0.0;
+        int pixelCentral_X = this.width / 2;
+        int pixelCentral_Y = this.height / 2;
+        
+        BufferedImage bufferFiltro = cloneImage();
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height; h++){
+                //Obtenemos el pixel
+                Color color = new Color(this.buffer_cambiada.getRGB(w, h));
+                
+                //Hacemos el calculo dependiendo el orden del filtro
+                distancia_AlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
+                double valorFiltro = (double)1 / (double)(1 + (int)Math.pow( ( (double)(distancia_AlCentro) / (double)(radioFiltro) ), 2 * ordenFiltro));
+                
+                int nuevoColor = 0;
+                nuevoColor = 255 - (int)(valorFiltro * (double)255);
+                
+                bufferFiltro.setRGB(w, h, new Color(nuevoColor,nuevoColor,nuevoColor).getRGB());
+            }
+        }
+        this.buffer_cambiada.setData(bufferFiltro.getRaster());
+    }
+    
+    public void obtenerFiltroGaussiano_PasaBajas(int radioCorte){
+        //Primero aplico la transformada
+        setFFT();
+        double distancia_AlCentro  = 0.0;
+        int pixelCentral_X = this.width / 2;
+        int pixelCentral_Y = this.height / 2;
+        
+        BufferedImage bufferFiltro = cloneImage();
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height; h++){
+                //Obtenemos el pixel
+                Color color = new Color(this.buffer_cambiada.getRGB(w, h));
+                
+                //Hacemos el calculo dependiendo el radio de corte
+                
+                //Obtenemos la distancia del pixel actual al centro
+                distancia_AlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
+                
+                //Calculamos el valor del filtro
+                double valorFiltro = Math.pow(Math.E, ( (double)( (double)-1 * (double)(Math.pow(distancia_AlCentro, 2)) ) / (double)( (double)2 * (double)Math.pow(radioCorte, 2)) ) );
+                
+                //Obtenemos el valor que tendrá el pixel
+                int colorNuevo = 0;
+                colorNuevo = (int)(valorFiltro * (double)255);
+                
+                //Asignamos al buffer del filtro el nuevo pixel
+                bufferFiltro.setRGB(w, h, new Color(colorNuevo,colorNuevo,colorNuevo).getRGB());
+            }
+        }
+        
+        //Asignamos al buffer que se muestra los resultados
+        this.buffer_cambiada.setData(bufferFiltro.getRaster());
+    }
+    
+    public void obtenerFiltroGaussiano_PasaAltas(int radioCorte){
+        //Primero aplico la transformada
+        setFFT();
+        double distancia_AlCentro  = 0.0;
+        int pixelCentral_X = this.width / 2;
+        int pixelCentral_Y = this.height / 2;
+        
+        BufferedImage bufferFiltro = cloneImage();
+        for(int w = 0; w < this.width; w++){
+            for(int h = 0; h < this.height; h++){
+                //Obtenemos el pixel
+                Color color = new Color(this.buffer_cambiada.getRGB(w, h));
+                
+                //Hacemos el calculo dependiendo el radio de corte
+                
+                //Obtenemos la distancia del pixel actual al centro
+                distancia_AlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
+                
+                //Calculamos el valor del filtro
+                double valorFiltro = Math.pow(Math.E, ( (double)( (double)-1 * (double)(Math.pow(distancia_AlCentro, 2)) ) / (double)( (double)2 * (double)Math.pow(radioCorte, 2)) ) );
+                
+                //Obtenemos el valor que tendrá el pixel
+                int colorNuevo = 0;
+                colorNuevo = 255 - (int)(valorFiltro * (double)255);
+                
+                //Asignamos al buffer del filtro el nuevo pixel
+                bufferFiltro.setRGB(w, h, new Color(colorNuevo,colorNuevo,colorNuevo).getRGB());
+            }
+        }
+        
+        //Asignamos al buffer que se muestra los resultados
+        this.buffer_cambiada.setData(bufferFiltro.getRaster());
+    }
+    
+    private double calcularDistanciaCentral(int puntoX1, int puntoX2, int puntoY1, int puntoY2){
+        return Math.sqrt(Math.pow((puntoX1 - puntoX2), 2) + Math.pow((puntoY1 - puntoY2),2)); 
     }
     
     private int obtenerNuevoUmbral(int umbral_actual){
@@ -740,6 +934,14 @@ public class ManipulacionImagen {
         }
         
         return valor;
+    }
+    
+    private BufferedImage cloneImage(){
+        BufferedImage b = new BufferedImage(this.buffer_cambiada.getWidth(), this.buffer_cambiada.getHeight(), this.buffer_cambiada.getType());
+        Graphics g = b.getGraphics();
+        g.drawImage(this.buffer_cambiada,0,0,null);
+        g.dispose();
+        return b;
     }
     
 }

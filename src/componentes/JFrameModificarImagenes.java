@@ -42,10 +42,10 @@ public class JFrameModificarImagenes extends JFrame{
         //Creamos los items del segundo menu
         items.add(new String[]{"Escala de Grises", "Negativo","Binarizar","Binarizacion Automática","Modificar Iluminación",
                                "Histograma de la imagen","Expansion Lineal","Expansion Logarítmica","Expansion Exponencial","Ecualizacion",
-                               "Matriz de Convolución","Añadir ruido","FFT"});
+                               "Matriz de Convolución","Añadir ruido","FFT", "Filtro Pasa-Bajas Ideal"});
         //Accion que detectará el item listener del segundo menú
         actionCommandsItems.add(new String[]{"EscalaGrises","Negativo","Binarizar","AutoBinarizar","Iluminacion",
-                                "Histograma","ExLineal","ExLog","ExExponencial","Ecualizar","MatrizConv","Ruido", "FFT"});
+                                "Histograma","ExLineal","ExLog","ExExponencial","Ecualizar","MatrizConv","Ruido", "FFT","FiltroBajaIdeal"});
         
         //Creamos un objeto con los menus y submenus anteriores
         MenuOptionImage menu_object = new MenuOptionImage(menus, items,actionCommandsItems,this);

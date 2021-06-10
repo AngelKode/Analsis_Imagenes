@@ -293,6 +293,16 @@ public class MenuOptionImage extends JMenuBar implements ActionListener, ItemLis
                 }
                 break; 
             }
+            case "FiltroBajaIdeal":{
+                if(isLabelNull()){
+                    JOptionPane.showMessageDialog(null, "Seleccione una imagen!","Cuidado",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    this.manipulador.obtenerFiltroGaussiano_PasaAltas(25);
+                    this.manipulador.getFrame().revalidate();
+                    this.manipulador.getFrame().repaint();
+                }
+                break;
+            }
             default:{
                 if(!isLabelNull()){
                     this.manipulador.obtenerHistograma();
