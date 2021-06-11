@@ -649,9 +649,9 @@ public class ManipulacionImagen {
             for(int h = 0; h < this.height; h++){
                 //Obtenemos el pixel
                 Color color = new Color(this.buffer_cambiada.getRGB(w, h));
-                distanciaAlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
-                System.out.println(distanciaAlCentro);
+                
                 //Checamos la distancia del punto actual al centro
+                distanciaAlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
                 
                 if(distanciaAlCentro <= radioFiltro){
                     //Si es menor o igual, vale 1 el pixel actual
@@ -774,7 +774,8 @@ public class ManipulacionImagen {
                 distancia_AlCentro = calcularDistanciaCentral(w,pixelCentral_X,h,pixelCentral_Y);
                 
                 //Calculamos el valor del filtro
-                double valorFiltro = Math.pow(Math.E, ( (double)( (double)-1 * (double)(Math.pow(distancia_AlCentro, 2)) ) / (double)( (double)2 * (double)Math.pow(radioCorte, 2)) ) );
+                double valorFiltro = Math.pow(Math.E, ( (double)( (double)-1 * (double)(Math.pow(distancia_AlCentro, 2)) ) / 
+                                                        (double)( (double)2 * (double)Math.pow(radioCorte, 2)) ) );
                 
                 //Obtenemos el valor que tendrá el pixel
                 int colorNuevo = 0;
